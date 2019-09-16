@@ -10,16 +10,13 @@ import (
 	"time"
 )
 
-type V interface {
+type Logger interface {
 	Err(error)
 	Str(string)
+	Strf(string, ...interface{})
 }
 
-type Logger interface {
-	V(Level) V
-}
-
-type log struct {
+type logger struct {
 	exit       func(exitCode int)
 	fatal      func(level Level) bool
 	fields     map[string][]interface{}
@@ -29,37 +26,30 @@ type log struct {
 	writer     func(level Level) io.Writer
 }
 
-type logger struct {
-	err func(error)
-	str func(string)
+type verbosity func(message string)
+
+func (v verbosity) Err(err error) {
+	var message string
+	if err != nil {
+		message = err.Error()
+	}
+	v(message)
 }
 
-func (l logger) Err(err error) { l.err(err) }
+func (v verbosity) Str(message string) {
+	v(message)
+}
 
-func (l logger) Str(str string) { l.str(str) }
-
-func (l *log) V(level Level) V {
-	return logger{
-		err: func(err error) {
-			if !l.verbose(level) {
-				return
-			}
-
-			var message string
-
-			if err != nil {
-				message = err.Error()
-			}
-
+func (l *logger) V(level Level) interface {
+	Err(error)
+	Str(string)
+} {
+	var v verbosity = func(message string) {
+		if l.verbose(level) {
 			l.log(level, message)
-		},
-		str: func(message string) {
-			if !l.verbose(level) {
-				return
-			}
-			l.log(level, message)
-		},
+		}
 	}
+	return v
 }
 
 type logEntry struct {
@@ -70,7 +60,7 @@ type logEntry struct {
 	CreatedAt string                   `json:"createdAt"`
 }
 
-func (l *log) log(level Level, message string) {
+func (l *logger) log(level Level, message string) {
 	var e = logEntry{
 		CreatedAt: time.Now().Format(l.timeFormat),
 		Fields:    l.fields,
@@ -91,11 +81,11 @@ func (l *log) log(level Level, message string) {
 	}
 }
 
-type Option func(*log)
+type Option func(*logger)
 
-var filter = func(verbosity Level) func(level Level) bool {
+var filter = func(max Level) func(level Level) bool {
 	return func(level Level) bool {
-		return level <= verbosity
+		return level <= max
 	}
 }
 
@@ -125,23 +115,23 @@ var defaultOptions = []Option{
 	WithVerbosityFunc(
 		func(level Level) bool {
 			var v int
-			var verbosity = DEBUG
+			var max = DEBUG
 			var f = flag.NewFlagSet("gobasics/log", flag.ExitOnError)
-			f.IntVar(&v, "v", int(verbosity), "Log verbosity level.")
+			f.IntVar(&v, "v", int(max), "Log verbosity level.")
 			if err := f.Parse(os.Args); err == nil {
-				verbosity = Level(v)
+				max = Level(v)
 			}
-			return filter(verbosity)(level)
+			return filter(max)(level)
 		},
 	),
 }
 
-func New(options ...Option) Logger {
+func New(options ...Option) func(Level) Logger {
 	options = append(
 		defaultOptions,
 		options...,
 	)
-	var l = log{
+	var l = logger{
 		fields: make(map[string][]interface{}),
 	}
 

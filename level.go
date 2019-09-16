@@ -7,7 +7,6 @@ const (
 	ERROR
 	WARN
 	INFO
-	DEBUG
 )
 
 var levels = []string{
@@ -15,7 +14,6 @@ var levels = []string{
 	"ERROR",
 	"WARN",
 	"INFO",
-	"DEBUG",
 }
 
 func (level Level) String() string {

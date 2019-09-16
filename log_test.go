@@ -65,8 +65,8 @@ func TestE(t *testing.T) {
 			var gotEntry logEntry
 
 			var w = &buffer{}
-			l.(*log).writer = func(Level) io.Writer { return w }
-			l.(*log).exit = func(int) { gotExited = true }
+			l.(*logger).writer = func(Level) io.Writer { return w }
+			l.(*logger).exit = func(int) { gotExited = true }
 
 			l.V(test.Level).Err(test.err)
 
