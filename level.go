@@ -8,21 +8,23 @@ const (
 	WARN
 	INFO
 	DEBUG
+
+	WARNING = WARN
 )
 
-var levels = []string{
-	"FATAL",
-	"ERROR",
-	"WARN",
-	"INFO",
-	"DEBUG",
-}
-
-func (level Level) String() string {
-	var n = Level(len(levels))
-	if level >= n {
-		level = n - 1
+func (l Level) String() string {
+	var levels = []string{
+		"FATAL",
+		"ERROR",
+		"WARN",
+		"INFO",
+		"DEBUG",
 	}
 
-	return levels[level]
+	var n = Level(len(levels))
+	if l >= n {
+		return levels[n-1]
+	}
+
+	return levels[l]
 }
