@@ -7,11 +7,9 @@ import (
 type Logger func(string)
 
 func (l Logger) Err(err error) {
-	var s string
 	if err != nil {
-		s = err.Error()
+		l(err.Error())
 	}
-	l(s)
 }
 
 func (l Logger) Str(s string) {
