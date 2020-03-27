@@ -18,3 +18,9 @@ var defaultOptions = []Option{
 }
 
 var V = NewFactory().Logger
+
+var Err = V(0).Err
+
+var Str = V(0).Str
+
+var Strf = V(0).Strf
