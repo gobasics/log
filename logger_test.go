@@ -48,7 +48,7 @@ func TestErr(t *testing.T) {
 
 	type logEntry struct {
 		Level   Level  `json:"level"`
-		Message string `json:"message"`
+		Message string `json:"log"`
 	}
 
 	for _, test := range []struct {
@@ -94,7 +94,7 @@ func TestErr(t *testing.T) {
 func TestStr(t *testing.T) {
 	type logEntry struct {
 		Level   Level  `json:"level"`
-		Message string `json:"message"`
+		Message string `json:"log"`
 	}
 
 	for _, test := range []struct {
@@ -135,7 +135,7 @@ func TestStrf(t *testing.T) {
 
 	type logEntry struct {
 		Level   Level  `json:"level"`
-		Message string `json:"message"`
+		Message string `json:"log"`
 	}
 
 	for _, test := range []struct {
