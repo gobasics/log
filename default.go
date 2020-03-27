@@ -4,16 +4,17 @@ import (
 	"os"
 )
 
-const defaultTimeFormat = "Mon, 02 Jan 2006 15:04:05.999 UTC"
-
-const defaultWriteLevel = 255
+const (
+	defaultTimeFormat = "Mon, 02 Jan 2006 15:04:05.999 UTC"
+	defaultVerbosity  = 255
+)
 
 var defaultWriter = os.Stdout
 
-var defaultConfig = Config{
-	TimeFormat: defaultTimeFormat,
-	Verbosity:  defaultWriteLevel,
-	Writer:     defaultWriter,
+var defaultOptions = []Option{
+	WithTimeFormat(defaultTimeFormat),
+	WithVerbosity(defaultVerbosity),
+	WithWriter(defaultWriter),
 }
 
-var V = defaultConfig.Logger
+var V = NewFactory().Logger

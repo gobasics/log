@@ -64,18 +64,11 @@ func TestErr(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			var w = buffer{}
 
-			var p = Config{
-				TimeFormat: defaultTimeFormat,
-				Verbosity:  defaultWriteLevel,
-				Writer:     &w,
-				Fields:     make(Fields),
-			}
-
-			p.Fields.Add("foo", "bar")
+			v := NewFactory(WithWriter(&w))
 
 			var gotEntry logEntry
 
-			p.V(test.Level).Err(test.err)
+			v.Logger(test.Level).Err(test.err)
 
 			if line := w.LastLine(); line != nil {
 				err = json.Unmarshal(line, &gotEntry)
@@ -108,12 +101,8 @@ func TestStr(t *testing.T) {
 			const wantMessage = "TestStr"
 
 			var w = buffer{}
-			var l = Config{
-				TimeFormat: defaultTimeFormat,
-				Verbosity:  defaultWriteLevel,
-				Writer:     &w,
-			}
-			l.V(test.Level).Str(wantMessage)
+			v := NewFactory(WithWriter(&w))
+			v.Logger(test.Level).Str(wantMessage)
 
 			var got logEntry
 			var line = w.LastLine()
@@ -153,12 +142,8 @@ func TestStrf(t *testing.T) {
 			var wantMessage = fmt.Sprintf(wrapMessage, cause)
 
 			var w = buffer{}
-			var l = Config{
-				TimeFormat: defaultTimeFormat,
-				Verbosity:  defaultWriteLevel,
-				Writer:     &w,
-			}
-			l.V(test.Level).Strf(wrapMessage, cause)
+			v := NewFactory(WithWriter(&w))
+			v.Logger(test.Level).Strf(wrapMessage, cause)
 
 			var got logEntry
 			var line = w.LastLine()
