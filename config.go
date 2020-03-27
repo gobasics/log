@@ -31,24 +31,25 @@ func (c Config) Logger(level Level) Logger {
 
 func (c Config) write(b []byte) {
 	w := c.Writer
-	if w != nil {
-		_, _ = w.Write(b)
+	if w == nil {
+		w = defaultWriter
 	}
+	_, _ = w.Write(b)
 }
 
 func (config Config) log(level Level, message string) {
 	type Log struct {
-		Fields    Fields `json:"fields,omitempty"`
-		File      string `json:"file"`
-		Level     Level  `json:"level"`
-		Message   string `json:"message"`
-		CreatedAt string `json:"created_at"`
+		Level  Level  `json:"level"`
+		At     string `json:"at"`
+		Log    string `json:"log"`
+		Fields Fields `json:"fields,omitempty"`
+		File   string `json:"file"`
 	}
 	var e = Log{
-		Fields:    config.Fields,
-		Level:     level,
-		Message:   message,
-		CreatedAt: time.Now().UTC().Format(config.TimeFormat),
+		Fields: config.Fields,
+		Level:  level,
+		Log:    message,
+		At:     config.timeNow(),
 	}
 	if _, file, line, ok := runtime.Caller(3); ok {
 		e.File = fmt.Sprintf("%s:%d", file, line)
@@ -56,4 +57,12 @@ func (config Config) log(level Level, message string) {
 	b, _ := json.Marshal(&e)
 	b = append(b, '\n')
 	config.write(b)
+}
+
+func (c Config) timeNow() string {
+	tf := c.TimeFormat
+	if tf == "" {
+		tf = defaultTimeFormat
+	}
+	return time.Now().UTC().Format(tf)
 }
