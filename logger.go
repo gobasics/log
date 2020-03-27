@@ -1,16 +1,12 @@
 package log
 
-import "fmt"
+import (
+	"fmt"
+)
 
-type Logger interface {
-	Err(error)
-	Str(string)
-	Strf(string, ...interface{})
-}
+type Logger func(string)
 
-type logger func(string)
-
-func (l logger) Err(err error) {
+func (l Logger) Err(err error) {
 	var s string
 	if err != nil {
 		s = err.Error()
@@ -18,10 +14,10 @@ func (l logger) Err(err error) {
 	l(s)
 }
 
-func (l logger) Str(s string) {
+func (l Logger) Str(s string) {
 	l(s)
 }
 
-func (l logger) Strf(s string, args ...interface{}) {
+func (l Logger) Strf(s string, args ...interface{}) {
 	l(fmt.Sprintf(s, args...))
 }

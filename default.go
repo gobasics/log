@@ -1,12 +1,19 @@
 package log
 
-var DefaultProvider = New()
+import (
+	"os"
+)
 
-var Fatal = DefaultProvider.V(FATAL).Str
-var Fatalf = DefaultProvider.V(FATAL).Strf
-var Error = DefaultProvider.V(ERROR).Str
-var Errorf = DefaultProvider.V(ERROR).Strf
-var Warning = DefaultProvider.V(WARNING).Str
-var Warningf = DefaultProvider.V(WARNING).Strf
-var Info = DefaultProvider.V(INFO).Str
-var Infof = DefaultProvider.V(INFO).Strf
+const defaultTimeFormat = "Mon, 02 Jan 2006 15:04:05.999 UTC"
+
+const defaultWriteLevel = 255
+
+var defaultWriter = os.Stdout
+
+var defaultConfig = Config{
+	TimeFormat:   defaultTimeFormat,
+	VerboseLevel: defaultWriteLevel,
+	Writer:       defaultWriter,
+}
+
+var V = defaultConfig.Logger

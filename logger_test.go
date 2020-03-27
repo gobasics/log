@@ -44,34 +44,34 @@ func equal(f func(string, ...interface{})) func(string) func(interface{}, interf
 
 func TestErr(t *testing.T) {
 	const message = "TestErr"
-
 	var err = errors.New(message)
 
 	type logEntry struct {
-		Level   string `json:"level"`
+		Level   Level  `json:"level"`
 		Message string `json:"message"`
 	}
 
 	for _, test := range []struct {
-		name   string
-		err    error
-		Exited bool
-		Level  Level
+		name  string
+		err   error
+		Level Level
 
 		Entry logEntry
 	}{
-		{"a", nil, true, FATAL, logEntry{Level: FATAL.String(), Message: ""}},
-		{"b", err, true, FATAL, logEntry{Level: FATAL.String(), Message: message}},
+		{"a", nil, 0, logEntry{Level: 0, Message: ""}},
+		{"b", err, 0, logEntry{Level: 0, Message: message}},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			var gotExited bool
-
 			var w = buffer{}
 
-			var p = New(
-				WithExitFunc(func(int) { gotExited = true }),
-				WithWriters(&w),
-			)
+			var p = Config{
+				TimeFormat:   defaultTimeFormat,
+				VerboseLevel: defaultWriteLevel,
+				Writer:       &w,
+				Fields:       make(Fields),
+			}
+
+			p.Fields.Add("foo", "bar")
 
 			var gotEntry logEntry
 
@@ -84,9 +84,7 @@ func TestErr(t *testing.T) {
 
 			var eq = equal(t.Errorf)
 
-			eq("exited -> got=%t, want=%t")(gotExited, test.Exited)
-
-			eq("level -> got=%s, want=%s")(gotEntry.Level, test.Entry.Level)
+			eq("level -> got=%d, want=%d")(gotEntry.Level, test.Entry.Level)
 
 			eq("message -> got=%s, want=%s")(gotEntry.Message, test.Entry.Message)
 		})
@@ -94,44 +92,39 @@ func TestErr(t *testing.T) {
 }
 
 func TestStr(t *testing.T) {
-
 	type logEntry struct {
-		Level   string `json:"level"`
+		Level   Level  `json:"level"`
 		Message string `json:"message"`
 	}
 
 	for _, test := range []struct {
-		name   string
-		Exited bool
-		Level  Level
+		name  string
+		Level Level
 	}{
-		{"a", true, FATAL},
-		{"b", false, ERROR},
+		{"a", 0},
+		{"b", 1},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			const wantMessage = "TestStr"
 
 			var w = buffer{}
-			var gotExited bool
-			var l = New(
-				WithExitFunc(func(int) { gotExited = true }),
-				WithWriters(&w),
-			)
-
+			var l = Config{
+				TimeFormat:   defaultTimeFormat,
+				VerboseLevel: defaultWriteLevel,
+				Writer:       &w,
+			}
 			l.V(test.Level).Str(wantMessage)
 
 			var got logEntry
 			var line = w.LastLine()
 			if line != nil {
 				var err = json.Unmarshal(line, &got)
-				equal(t.Errorf)("err -> got=%#v, want=%#v")(err, nil)
+				equal(t.Errorf)("err -> got=%#v, want=%#v; %w")(err, nil)
 			}
 
 			var eq = equal(t.Errorf)
 
-			eq("exited -> got=%t, want=%t")(gotExited, test.Exited)
-
-			eq("level -> got=%s, want=%s")(got.Level, test.Level.String())
+			eq("level -> got=%d, want=%d")(got.Level, test.Level)
 
 			eq("message -> got=%s, want=%s")(got.Message, wantMessage)
 		})
@@ -141,17 +134,16 @@ func TestStr(t *testing.T) {
 func TestStrf(t *testing.T) {
 
 	type logEntry struct {
-		Level   string `json:"level"`
+		Level   Level  `json:"level"`
 		Message string `json:"message"`
 	}
 
 	for _, test := range []struct {
-		name   string
-		Exited bool
-		Level  Level
+		name  string
+		Level Level
 	}{
-		{"a", true, FATAL},
-		{"b", false, ERROR},
+		{"a", 0},
+		{"b", 1},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			const wrapMessage = "TestStr; %s"
@@ -161,12 +153,11 @@ func TestStrf(t *testing.T) {
 			var wantMessage = fmt.Sprintf(wrapMessage, cause)
 
 			var w = buffer{}
-			var gotExited bool
-			var l = New(
-				WithExitFunc(func(int) { gotExited = true }),
-				WithWriters(&w),
-			)
-
+			var l = Config{
+				TimeFormat:   defaultTimeFormat,
+				VerboseLevel: defaultWriteLevel,
+				Writer:       &w,
+			}
 			l.V(test.Level).Strf(wrapMessage, cause)
 
 			var got logEntry
@@ -178,9 +169,7 @@ func TestStrf(t *testing.T) {
 
 			var eq = equal(t.Errorf)
 
-			eq("exited -> got=%t, want=%t")(gotExited, test.Exited)
-
-			eq("level -> got=%s, want=%s")(got.Level, test.Level.String())
+			eq("level -> got=%d, want=%d")(got.Level, test.Level)
 
 			eq("message -> got=%s, want=%s")(got.Message, wantMessage)
 		})
