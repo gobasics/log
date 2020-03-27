@@ -11,10 +11,10 @@ import (
 type Level uint8
 
 type Config struct {
-	Fields       Fields
-	TimeFormat   string
-	VerboseLevel Level
-	Writer       io.Writer
+	Fields     Fields
+	TimeFormat string
+	Verbosity  Level
+	Writer     io.Writer
 }
 
 func (c Config) V(level Level) Logger {
@@ -23,7 +23,7 @@ func (c Config) V(level Level) Logger {
 
 func (c Config) Logger(level Level) Logger {
 	return func(message string) {
-		if c.VerboseLevel >= level {
+		if c.Verbosity >= level {
 			c.log(level, message)
 		}
 	}
@@ -50,7 +50,7 @@ func (config Config) log(level Level, message string) {
 		Message:   message,
 		CreatedAt: time.Now().UTC().Format(config.TimeFormat),
 	}
-	if _, file, line, ok := runtime.Caller(1); ok {
+	if _, file, line, ok := runtime.Caller(3); ok {
 		e.File = fmt.Sprintf("%s:%d", file, line)
 	}
 	b, _ := json.Marshal(&e)

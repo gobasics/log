@@ -11,9 +11,9 @@ const defaultWriteLevel = 255
 var defaultWriter = os.Stdout
 
 var defaultConfig = Config{
-	TimeFormat:   defaultTimeFormat,
-	VerboseLevel: defaultWriteLevel,
-	Writer:       defaultWriter,
+	TimeFormat: defaultTimeFormat,
+	Verbosity:  defaultWriteLevel,
+	Writer:     defaultWriter,
 }
 
 var V = defaultConfig.Logger

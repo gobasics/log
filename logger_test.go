@@ -65,10 +65,10 @@ func TestErr(t *testing.T) {
 			var w = buffer{}
 
 			var p = Config{
-				TimeFormat:   defaultTimeFormat,
-				VerboseLevel: defaultWriteLevel,
-				Writer:       &w,
-				Fields:       make(Fields),
+				TimeFormat: defaultTimeFormat,
+				Verbosity:  defaultWriteLevel,
+				Writer:     &w,
+				Fields:     make(Fields),
 			}
 
 			p.Fields.Add("foo", "bar")
@@ -109,9 +109,9 @@ func TestStr(t *testing.T) {
 
 			var w = buffer{}
 			var l = Config{
-				TimeFormat:   defaultTimeFormat,
-				VerboseLevel: defaultWriteLevel,
-				Writer:       &w,
+				TimeFormat: defaultTimeFormat,
+				Verbosity:  defaultWriteLevel,
+				Writer:     &w,
 			}
 			l.V(test.Level).Str(wantMessage)
 
@@ -154,9 +154,9 @@ func TestStrf(t *testing.T) {
 
 			var w = buffer{}
 			var l = Config{
-				TimeFormat:   defaultTimeFormat,
-				VerboseLevel: defaultWriteLevel,
-				Writer:       &w,
+				TimeFormat: defaultTimeFormat,
+				Verbosity:  defaultWriteLevel,
+				Writer:     &w,
 			}
 			l.V(test.Level).Strf(wrapMessage, cause)
 
