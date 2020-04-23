@@ -12,6 +12,7 @@ const (
 var defaultWriter = os.Stdout
 
 var defaultOptions = []Option{
+	WithSkip(3),
 	WithTimeFormat(defaultTimeFormat),
 	WithVerbosity(defaultVerbosity),
 	WithWriter(defaultWriter),

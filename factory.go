@@ -13,6 +13,7 @@ type Fields map[string][]string
 type Level uint8
 
 type Factory struct {
+	skip       int
 	fields     Fields
 	timeFormat string
 	verbosity  Level
@@ -46,7 +47,7 @@ func (f Factory) log(level Level, message string) {
 		Log:    message,
 		At:     time.Now().UTC().Format(f.timeFormat),
 	}
-	if _, file, line, ok := runtime.Caller(3); ok {
+	if _, file, line, ok := runtime.Caller(f.skip); ok {
 		e.File = fmt.Sprintf("%s:%d", file, line)
 	}
 	b, _ := json.Marshal(&e)
