@@ -57,7 +57,7 @@ func (f Factory) log(level Level, message string) {
 
 func NewFactory(options ...Option) Factory {
 	var f Factory
-	for _, fn := range defaultOptions {
+	for _, fn := range DefaultOptions {
 		fn(&f)
 	}
 	for _, fn := range options {

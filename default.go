@@ -5,23 +5,22 @@ import (
 )
 
 const (
-	defaultTimeFormat = "Mon, 02 Jan 2006 15:04:05.999 UTC"
-	defaultVerbosity  = 255
+	DefaultTimeFormat = "Mon, 02 Jan 2006 15:04:05.999 UTC"
 )
 
-var defaultWriter = os.Stdout
-
-var defaultOptions = []Option{
+var DefaultOptions = []Option{
 	WithSkip(3),
-	WithTimeFormat(defaultTimeFormat),
-	WithVerbosity(defaultVerbosity),
-	WithWriter(defaultWriter),
+	WithTimeFormat(DefaultTimeFormat),
+	WithVerbosity(2),
+	WithWriter(os.Stdout),
 }
 
-var V = NewFactory().Logger
+var DefaultLogger = NewFactory(DefaultOptions...).Logger
 
-var Err = V(0).Err
+var Fatal = DefaultLogger(0)
 
-var Str = V(0).Str
+var Error = DefaultLogger(1)
 
-var Strf = V(0).Strf
+var Warning = DefaultLogger(2)
+
+var Info = DefaultLogger(3)
