@@ -1,26 +1,22 @@
 package log
 
-import (
-	"os"
-)
+import "os"
 
 const (
-	DefaultTimeFormat = "Mon, 02 Jan 2006 15:04:05.999 UTC"
+	TimeFormat = "Mon, 02 Jan 2006 15:04:05.999 UTC"
 )
 
-var DefaultOptions = []Option{
+var V = New(
 	WithSkip(3),
-	WithTimeFormat(DefaultTimeFormat),
-	WithVerbosity(3),
+	WithTimeFormat(TimeFormat),
+	WithVerbosity(255),
 	WithWriter(os.Stdout),
-}
+)
 
-var DefaultLogger = NewFactory(DefaultOptions...).Logger
+var Fatal = V(0)
 
-var Fatal = DefaultLogger(0)
+var Error = V(1)
 
-var Error = DefaultLogger(1)
+var Warning = V(2)
 
-var Warning = DefaultLogger(2)
-
-var Info = DefaultLogger(3)
+var Info = V(3)

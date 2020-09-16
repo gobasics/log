@@ -3,7 +3,7 @@ package log
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
+	"strconv"
 	"sync"
 	"testing"
 )
@@ -20,6 +20,16 @@ func (b *buffer) Write(v []byte) (int, error) {
 	return len(v), nil
 }
 
+func (b *buffer) LastLog() *Log {
+	var l Log
+	line := b.LastLine()
+	if line == nil {
+		return nil
+	}
+	_ = json.Unmarshal(line, &l)
+	return &l
+}
+
 func (b *buffer) LastLine() []byte {
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
@@ -32,90 +42,55 @@ func (b *buffer) LastLine() []byte {
 	return nil
 }
 
-func equal(f func(string, ...interface{})) func(string) func(interface{}, interface{}) {
-	return func(message string) func(interface{}, interface{}) {
-		return func(got, want interface{}) {
-			if got != want {
-				f(message, got, want)
-			}
-		}
-	}
-}
-
 func TestErr(t *testing.T) {
-	const message = "TestErr"
-	var err = errors.New(message)
-
-	type logEntry struct {
-		Level   Level  `json:"level"`
-		Message string `json:"log"`
-	}
-
-	for _, test := range []struct {
-		name  string
+	for k, test := range []struct {
 		err   error
 		Level Level
-
-		Entry logEntry
+		Log   string
 	}{
-		{"a", nil, 0, logEntry{Level: 0, Message: ""}},
-		{"b", err, 0, logEntry{Level: 0, Message: message}},
+		{nil, 0, ""},
+		{errors.New("foo"), 0, "foo"},
+		{errors.New("bar"), 0, "bar"},
 	} {
-		t.Run(test.name, func(t *testing.T) {
+		t.Run(strconv.Itoa(k), func(t *testing.T) {
 			var w = buffer{}
 
-			v := NewFactory(WithWriter(&w))
+			New(WithWriter(&w))(test.Level).Err(test.err)
 
-			var gotEntry logEntry
+			got := w.LastLog()
 
-			v.Logger(test.Level).Err(test.err)
-
-			if line := w.LastLine(); line != nil {
-				err = json.Unmarshal(line, &gotEntry)
-				equal(t.Errorf)("err -> got=%#v, want=%#v")(err, nil)
+			if got != nil && test.Level != got.Level {
+				t.Errorf("want %d, got %d", test.Level, got.Level)
 			}
 
-			var eq = equal(t.Errorf)
-
-			eq("level -> got=%d, want=%d")(gotEntry.Level, test.Entry.Level)
-
-			eq("message -> got=%s, want=%s")(gotEntry.Message, test.Entry.Message)
+			if got != nil && test.Log != got.Log {
+				t.Errorf("want %s, got %s", test.Log, got.Log)
+			}
 		})
 	}
 }
 
 func TestStr(t *testing.T) {
-	type logEntry struct {
-		Level   Level  `json:"level"`
-		Message string `json:"log"`
-	}
-
-	for _, test := range []struct {
-		name  string
+	for k, v := range []struct {
 		Level Level
+		Log   string
 	}{
-		{"a", 0},
-		{"b", 1},
+		{0, "foo"},
+		{1, "bar"},
 	} {
-		t.Run(test.name, func(t *testing.T) {
-			const wantMessage = "TestStr"
-
+		t.Run(strconv.Itoa(k), func(t *testing.T) {
 			var w = buffer{}
-			v := NewFactory(WithWriter(&w))
-			v.Logger(test.Level).Str(wantMessage)
+			New(WithWriter(&w))(v.Level).Str(v.Log)
 
-			var got logEntry
-			var line = w.LastLine()
-			if line != nil {
-				var err = json.Unmarshal(line, &got)
-				equal(t.Errorf)("err -> got=%#v, want=%#v; %w")(err, nil)
+			got := w.LastLog()
+
+			if got != nil && v.Level != got.Level {
+				t.Errorf("want level=%d, got %d", v.Level, got.Level)
 			}
 
-			var eq = equal(t.Errorf)
-
-			eq("level -> got=%d, want=%d")(got.Level, test.Level)
-
-			eq("message -> got=%s, want=%s")(got.Message, wantMessage)
+			if got != nil && v.Log != got.Log {
+				t.Errorf("want message=%s, got %s", v.Log, got.Log)
+			}
 		})
 	}
 }
@@ -127,36 +102,26 @@ func TestStrf(t *testing.T) {
 		Message string `json:"log"`
 	}
 
-	for _, test := range []struct {
-		name  string
+	for k, test := range []struct {
 		Level Level
+		Log   string
 	}{
-		{"a", 0},
-		{"b", 1},
+		{0, "foo"},
+		{1, "bar"},
 	} {
-		t.Run(test.name, func(t *testing.T) {
-			const wrapMessage = "TestStr; %s"
-
-			var cause = "cause"
-
-			var wantMessage = fmt.Sprintf(wrapMessage, cause)
-
+		t.Run(strconv.Itoa(k), func(t *testing.T) {
 			var w = buffer{}
-			v := NewFactory(WithWriter(&w))
-			v.Logger(test.Level).Strf(wrapMessage, cause)
+			New(WithWriter(&w))(test.Level).Strf("%s", test.Log)
 
-			var got logEntry
-			var line = w.LastLine()
-			if line != nil {
-				var err = json.Unmarshal(line, &got)
-				equal(t.Errorf)("err -> got=%#v, want=%#v")(err, nil)
+			got := w.LastLog()
+
+			if got != nil && test.Level != got.Level {
+				t.Errorf("want %d, got %d", test.Level, got.Level)
 			}
 
-			var eq = equal(t.Errorf)
-
-			eq("level -> got=%d, want=%d")(got.Level, test.Level)
-
-			eq("message -> got=%s, want=%s")(got.Message, wantMessage)
+			if got != nil && test.Log != got.Log {
+				t.Errorf("want %s, got %s", test.Log, got.Log)
+			}
 		})
 	}
 }
