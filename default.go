@@ -11,7 +11,7 @@ const (
 var DefaultOptions = []Option{
 	WithSkip(3),
 	WithTimeFormat(DefaultTimeFormat),
-	WithVerbosity(2),
+	WithVerbosity(3),
 	WithWriter(os.Stdout),
 }
 
