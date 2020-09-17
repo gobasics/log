@@ -3,15 +3,14 @@ package log
 import "os"
 
 const (
+	Skip       = 3
 	TimeFormat = "Mon, 02 Jan 2006 15:04:05.999 UTC"
+	Verbosity  = 255
 )
 
-var V = New(
-	WithSkip(3),
-	WithTimeFormat(TimeFormat),
-	WithVerbosity(255),
-	WithWriter(os.Stdout),
-)
+var Writer = os.Stdout
+
+var V = New()
 
 var Fatal = V(0)
 

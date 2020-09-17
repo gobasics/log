@@ -25,7 +25,14 @@ func (l Logger) Strf(s string, args ...interface{}) {
 func New(options ...Option) func(Level) Logger {
 	var c Config
 
-	(&c).Apply(options...)
+	c.Apply(
+		WithSkip(Skip),
+		WithTimeFormat(TimeFormat),
+		WithVerbosity(Verbosity),
+		WithWriter(Writer),
+	)
+
+	c.Apply(options...)
 
 	return func(level Level) Logger {
 		return func(message string) {
