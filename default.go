@@ -3,7 +3,7 @@ package log
 import "os"
 
 const (
-	Skip       = 3
+	Skip       = 2
 	TimeFormat = "Mon, 02 Jan 2006 15:04:05.999 UTC"
 	Verbosity  = 255
 )
